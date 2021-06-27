@@ -74,8 +74,10 @@ namespace WebWal.Controllers
             var wallet = await _context.Wallets.FirstOrDefaultAsync(x => x.UserId == UserId);
             if (wallet == null)
             {
+                _logger.LogInformation(LogEvents.InsertItem, "New Wallet");
                 return Ok(_deposit.NewDeposit(command, UserId));
             }
+            _logger.LogInformation(LogEvents.UpdateItem, "Update balance");
             return Ok(_deposit.Deposit(command,wallet));
         }
         /// <summary>
