@@ -73,10 +73,10 @@ namespace WebWal.Controllers
             var wallet = await _context.Wallets.FirstOrDefaultAsync(x => x.UserId == UserId && x.Currency == command.Currency);
             if (wallet == null)
             {
-                _logger.LogInformation(LogEvents.InsertItem, "New Wallet");
+                _logger.LogInformation(LogEvents.InsertItem, "New Wallet User {id}", UserId);
                 return Ok(await _deposit.NewDeposit(command, UserId));
             }
-            _logger.LogInformation(LogEvents.UpdateItem, "Update balance");
+            _logger.LogInformation(LogEvents.UpdateItem, "Update balance User {id}", UserId);
             return Ok(await _deposit.Deposit(command,wallet));
         }
         /// <summary>
@@ -102,7 +102,7 @@ namespace WebWal.Controllers
 
             if (wallet.Balance < command.Withdraw)
             {
-                _logger.LogWarning(LogEvents.GenerateItems, "Wallet can't withdraw balance");
+                _logger.LogWarning(LogEvents.GenerateItems, "Wallet can't withdraw balance User {id}", UserId);
                 return BadRequest();
             }
 
@@ -130,7 +130,7 @@ namespace WebWal.Controllers
                 _logger.LogInformation(LogEvents.GetItemNotFound, "Wallet not found");
                 return NotFound();
             }
-            _logger.LogInformation(LogEvents.UpdateItem, "Wallet currency convert");
+            _logger.LogInformation(LogEvents.UpdateItem, "Wallet currency convert User {id}", UserId);
             await _context.SaveChangesAsync();
             return Ok(_convertCurrency.ConvertWallet(command,wallet));
         }
