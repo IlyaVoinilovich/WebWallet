@@ -9,6 +9,6 @@ namespace WebWal.Interface
     public interface IDeposit
     {
         public Task<BalanceInfo> NewDeposit(DepositCommand command,long UserId);
-        public  BalanceInfo Deposit(DepositCommand command, UserWallet wallet); 
+        public Task<BalanceInfo> Deposit(DepositCommand command, UserWallet wallet); 
     }
 }

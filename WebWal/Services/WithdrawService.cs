@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 using WebWal.Interface;
 using WebWal.Models;
 
@@ -13,11 +14,11 @@ namespace WebWal.Services
             _context= context; 
         }
 
-        public  BalanceInfo Withdraw(WithdrawCommand command,UserWallet wallet)
+        public async Task<BalanceInfo> Withdraw(WithdrawCommand command,UserWallet wallet)
         {
             wallet.SubtractBalance(command.Withdraw);
             _context.Entry(wallet).State = EntityState.Modified;
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return new BalanceInfo(wallet);
         }
     }

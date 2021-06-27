@@ -1,11 +1,12 @@
 ﻿
 
+using System.Threading.Tasks;
 using WebWal.Models;
 
 namespace WebWal.Interface
 {
     public interface IWithdraw
     {
-        public BalanceInfo Withdraw(WithdrawCommand command, UserWallet wallet);
+        public Task<BalanceInfo> Withdraw(WithdrawCommand command, UserWallet wallet);
     }
 }

@@ -13,7 +13,6 @@ using System.Collections.Generic;
 
 namespace WebWal.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
 
@@ -28,7 +27,7 @@ namespace WebWal.Controllers
         private readonly IConvertCurrency _convertCurrency;
         private readonly ILogger<WalletConrollers> _logger;
 
-        private long UserId => long.Parse(User.Claims.Single(c => c.Type == ClaimTypes.NameIdentifier).Value);
+        private long UserId => long.Parse(User.Claims.Single(c => string.IsNullOrEmpty(c.Type)|| c.Type == ClaimTypes.NameIdentifier).Value);
         /// <summary>
         /// 
         /// </summary>
@@ -75,10 +74,10 @@ namespace WebWal.Controllers
             if (wallet == null)
             {
                 _logger.LogInformation(LogEvents.InsertItem, "New Wallet");
-                return Ok(_deposit.NewDeposit(command, UserId));
+                return Ok(await _deposit.NewDeposit(command, UserId));
             }
             _logger.LogInformation(LogEvents.UpdateItem, "Update balance");
-            return Ok(_deposit.Deposit(command,wallet));
+            return Ok(await _deposit.Deposit(command,wallet));
         }
         /// <summary>
         ///     Withdraw money in one of the currencies.

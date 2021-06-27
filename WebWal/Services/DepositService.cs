@@ -18,11 +18,11 @@ namespace WebWal.Services
             _context = context;
         }
 
-        public BalanceInfo Deposit(DepositCommand command, UserWallet wallet)
+        public async Task<BalanceInfo> Deposit(DepositCommand command, UserWallet wallet)
         {
                 wallet.AddBalance(command.Balance);
                 _context.Entry(wallet).State = EntityState.Modified;
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
                 return new BalanceInfo(wallet);
         }
         public async Task<BalanceInfo> NewDeposit(DepositCommand command, long UserId)
