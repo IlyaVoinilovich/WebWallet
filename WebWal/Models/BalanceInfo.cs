@@ -4,6 +4,9 @@ using WebWal.Helpers;
 
 namespace WebWal.Models
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class BalanceInfo
     {
         private readonly UserWallet _userWallet;
@@ -14,7 +17,7 @@ namespace WebWal.Models
             _userWallet = userWallet;
         }
         public decimal Balance => _userWallet.Balance;
-        public Currency Currency => _userWallet.Currency;
+        public string Currency => _userWallet.Currency;
 
         }
     }

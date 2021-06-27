@@ -11,35 +11,26 @@ namespace WebWal.Services
 {
     public class DepositService:IDeposit
     {
-        private readonly IConvertCurrency _convertCurrency;
+        private readonly WalletDbContextcs _context;
 
-        public DepositService(IConvertCurrency convertCurrency)
+        public DepositService( WalletDbContextcs context)
         {
-            _convertCurrency = convertCurrency;
+            _context = context;
         }
 
         public BalanceInfo Deposit(DepositCommand command, UserWallet wallet)
         {
-            if (command.Currency == wallet.Currency)
                 wallet.AddBalance(command.Balance);
-            else
-            {
-                return ConvertDeposit(command, wallet);
-            }
-            return new BalanceInfo(wallet);
+                _context.Entry(wallet).State = EntityState.Modified;
+                _context.SaveChanges();
+                return new BalanceInfo(wallet);
         }
-        public BalanceInfo NewDeposit(DepositCommand command,long UserId)
+        public async Task<BalanceInfo> NewDeposit(DepositCommand command, long UserId)
         {
             var entity = new UserWallet(command.Balance, command.Currency, UserId);
+            await _context.Wallets.AddAsync(entity);
+            await _context.SaveChangesAsync();
             return new BalanceInfo(entity);
-        }
-        public BalanceInfo ConvertDeposit(DepositCommand command, UserWallet wallet)
-        {
-            var balance = _convertCurrency.ExchangeRate(wallet.Balance, wallet.Currency, command.Currency);
-            wallet.Currency = command.Currency;
-            wallet.Balance = balance;
-            wallet.AddBalance(command.Balance);
-            return new BalanceInfo(wallet);
         }
     }
 }

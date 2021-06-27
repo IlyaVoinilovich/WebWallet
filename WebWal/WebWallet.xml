@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>WebWal</name>
+    </assembly>
+    <members>
+        <member name="F:WebWal.Controllers.WalletConrollers._context">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:WebWal.Controllers.WalletConrollers.#ctor(WebWal.WalletDbContextcs,WebWal.Interface.IWithdraw,WebWal.Interface.IDeposit,WebWal.Interface.IConvertCurrency,Microsoft.Extensions.Logging.ILogger{WebWal.Controllers.WalletConrollers})">
+            <summary>
+            
+            </summary>
+            <param name="context"></param>
+        </member>
+        <member name="M:WebWal.Controllers.WalletConrollers.Balance">
+            <summary>
+                Get the state of your wallet (the amount of money in each currency).
+            </summary>
+            <returns>The user's balance.</returns>
+        </member>
+        <member name="M:WebWal.Controllers.WalletConrollers.Deposit(WebWal.Models.DepositCommand)">
+            <summary>
+                Top up user wallet in one of the currencies.
+            </summary>
+            <param name="command">Request body.</param>
+            <response code="200">If the wallet has been successfully replenished.</response>
+            <response code="400">If the request body will not pass validation.</response>
+        </member>
+        <member name="M:WebWal.Controllers.WalletConrollers.Withdraw(WebWal.Models.WithdrawCommand)">
+            <summary>
+                Withdraw money in one of the currencies.
+            </summary>
+            <param name="command">Request body.</param>
+            <response code="200">If the money was successfully withdrawn.</response>
+            <response code="400">If the request body will not pass validation.</response>
+            <response code="404">If the user is not found.</response>
+        </member>
+        <member name="M:WebWal.Controllers.WalletConrollers.Convert(WebWal.Models.ConvertCommand)">
+            <summary>
+                Transfer money from one currency to another.
+            </summary>
+            <param name="command">Request body.</param>
+            <response code="200">If the currency was successfully converted to another currency.</response>
+            <response code="400">If the request body will not pass validation.</response>
+            <response code="404">If the user is not found.</response>
+        </member>
+        <member name="T:WebWal.Helpers.FakeUserApi.Models.LogEvents">
+            <summary>
+            MyLogEvents
+            </summary>
+        </member>
+        <member name="F:WebWal.Helpers.FakeUserApi.Models.LogEvents.GenerateItems">
+            <summary>
+            GenerateItems
+            </summary>
+        </member>
+        <member name="F:WebWal.Helpers.FakeUserApi.Models.LogEvents.ListItems">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:WebWal.Helpers.FakeUserApi.Models.LogEvents.GetItem">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:WebWal.Helpers.FakeUserApi.Models.LogEvents.InsertItem">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:WebWal.Helpers.FakeUserApi.Models.LogEvents.UpdateItem">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:WebWal.Helpers.FakeUserApi.Models.LogEvents.DeleteItem">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:WebWal.Helpers.FakeUserApi.Models.LogEvents.TestItem">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:WebWal.Helpers.FakeUserApi.Models.LogEvents.GetItemNotFound">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:WebWal.Helpers.FakeUserApi.Models.LogEvents.UpdateItemNotFound">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:WebWal.Models.BalanceInfo">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:WebWal.Models.ConvertCommand.ToCurrency">
+            <summary>
+                The currency that will be converted to another currency.
+            </summary>
+        </member>
+        <member name="P:WebWal.Models.DepositCommand.Balance">
+            <summary>
+                Amount to be deposited.
+            </summary>
+        </member>
+        <member name="P:WebWal.Models.DepositCommand.Currency">
+            <summary>
+                The currency that the amount will be deposited in.
+            </summary>
+        </member>
+        <member name="P:WebWal.Models.WithdrawCommand.Withdraw">
+            <summary>
+                The amount you need to cash out.
+            </summary>
+        </member>
+        <member name="P:WebWal.Models.WithdrawCommand.Currency">
+            <summary>
+                The currency that the amount will be cashed from.
+            </summary>
+        </member>
+    </members>
+</doc>

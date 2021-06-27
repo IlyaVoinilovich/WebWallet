@@ -9,16 +9,20 @@ using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using WebWal.Helpers.FakeUserApi.Models;
+using System.Collections.Generic;
 
 namespace WebWal.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
+
     public class WalletConrollers : ControllerBase
     {
+        /// <summary>
+        /// 
+        /// </summary>
         private readonly WalletDbContextcs _context;
-        private readonly IBalance _balance;
         private readonly IWithdraw _withdraw;
         private readonly IDeposit _deposit;
         private readonly IConvertCurrency _convertCurrency;
@@ -29,10 +33,9 @@ namespace WebWal.Controllers
         /// 
         /// </summary>
         /// <param name="context"></param>
-        public WalletConrollers(WalletDbContextcs context, IBalance balance, IWithdraw withdraw, IDeposit deposit, IConvertCurrency convertCurrency, ILogger<WalletConrollers> logger)
+        public WalletConrollers(WalletDbContextcs context,  IWithdraw withdraw, IDeposit deposit, IConvertCurrency convertCurrency, ILogger<WalletConrollers> logger)
         {
             _context = context;
-            _balance = balance;
             _withdraw = withdraw;
             _deposit = deposit;
             _convertCurrency = convertCurrency;
@@ -41,21 +44,18 @@ namespace WebWal.Controllers
         /// <summary>
         ///     Get the state of your wallet (the amount of money in each currency).
         /// </summary>
-        /// <param name="userId">The primary user key.</param>
         /// <returns>The user's balance.</returns>
         [Authorize]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<BalanceInfo>> Balance()
+        public async Task<ActionResult<IEnumerable<BalanceInfo>>> Balance()
         {
-            var wallet = await _context.Wallets.FirstOrDefaultAsync(x => x.UserId == UserId);
-            if (wallet == null)
-            {
-                return NotFound();
-            }
-                return Ok(_balance.Balance(UserId));
+            return await _context.Wallets
+               .AsNoTracking()
+               .Where(x => x.UserId == UserId)
+               .Select(x => new BalanceInfo(x)).ToArrayAsync();
         }
 
         /// <summary>
@@ -65,13 +65,13 @@ namespace WebWal.Controllers
         /// <response code="200">If the wallet has been successfully replenished.</response>
         /// <response code="400">If the request body will not pass validation.</response>
         [Authorize]
-        [HttpPost]
+        [HttpPost("deposit")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesDefaultResponseType]
         public async Task<ActionResult<BalanceInfo>> Deposit([FromBody] DepositCommand command)
         {
-            var wallet = await _context.Wallets.FirstOrDefaultAsync(x => x.UserId == UserId);
+            var wallet = await _context.Wallets.FirstOrDefaultAsync(x => x.UserId == UserId && x.Currency == command.Currency);
             if (wallet == null)
             {
                 _logger.LogInformation(LogEvents.InsertItem, "New Wallet");
@@ -84,18 +84,17 @@ namespace WebWal.Controllers
         ///     Withdraw money in one of the currencies.
         /// </summary>
         /// <param name="command">Request body.</param>
-        /// <param name="cancellationToken">Client closed request.</param>
         /// <response code="200">If the money was successfully withdrawn.</response>
         /// <response code="400">If the request body will not pass validation.</response>
         /// <response code="404">If the user is not found.</response>
         [Authorize]
-        [HttpPost]
+        [HttpPost("withdraw")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<BalanceInfo>> Withdraw([FromBody] WithdrawCommand command)
         {
-            var wallet = await _context.Wallets.FirstOrDefaultAsync(x => x.UserId == UserId);
+            var wallet = await _context.Wallets.FirstOrDefaultAsync(x => x.UserId == UserId && x.Currency == command.Currency);
             if (wallet == null)
             {
                 _logger.LogInformation(LogEvents.GetItemNotFound, "Wallet not found");
@@ -116,25 +115,25 @@ namespace WebWal.Controllers
         ///     Transfer money from one currency to another.
         /// </summary>
         /// <param name="command">Request body.</param>
-        /// <param name="cancellationToken">Client closed request.</param>
         /// <response code="200">If the currency was successfully converted to another currency.</response>
         /// <response code="400">If the request body will not pass validation.</response>
         /// <response code="404">If the user is not found.</response>
         [Authorize]
-        [HttpPost]
+        [HttpPost("convert")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<BalanceInfo>> Convert([FromBody] ConvertCommand command)
         {
-            var wallet = await _context.Wallets.FirstOrDefaultAsync(x => x.UserId == UserId);
+            var wallet = await _context.Wallets.FirstOrDefaultAsync(x => x.UserId == UserId && x.Currency==command.fromCurrency);
             if (wallet == null)
             {
                 _logger.LogInformation(LogEvents.GetItemNotFound, "Wallet not found");
                 return NotFound();
             }
             _logger.LogInformation(LogEvents.UpdateItem, "Wallet currency convert");
-            return Ok(_convertCurrency.ExchangeRate(wallet.Balance,command.FromCurrency,command.ToCurrency));
+            await _context.SaveChangesAsync();
+            return Ok(_convertCurrency.ConvertWallet(command,wallet));
         }
     }
 }

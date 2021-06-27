@@ -1,10 +1,14 @@
-﻿using WebWal.Helpers;
+﻿using System.Threading.Tasks;
+using WebWal.Helpers;
+using WebWal.Helpers.Enums;
+using WebWal.Models;
 
 namespace WebWal.Interface
 {
     public interface IConvertCurrency
     {
-        public decimal ConvertCurrency(decimal balance, decimal fromRate, decimal toRate);
-        public decimal ExchangeRate(decimal balance, Currency fromCurrency, Currency toCurrency);
+        public decimal Convert(decimal amount, string from, string to);
+        public  Task<decimal> ConvertAsync(decimal amount, string from, string to);
+        public BalanceInfo ConvertWallet(ConvertCommand command, UserWallet wallet);
     }
 }

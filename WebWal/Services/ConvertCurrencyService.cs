@@ -1,35 +1,31 @@
-﻿
-using WebWal.Helpers;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using WebWal.Helpers.Enums;
 using WebWal.Interface;
+using WebWal.Models;
 
-namespace WebWal.Services
+namespace WebWal.Helpers
 {
-    public class ConvertService: IConvertCurrency
+    public class ConvertCurrencyService: IConvertCurrency
     {
-        private readonly IConvertHelpers _convertHelpers;
-        public ConvertService(IConvertHelpers convertHelpers)
+        private string ApiKey = "b46d6d763f22a14e01c7";
+
+        public decimal Convert(decimal amount, string from, string to)
         {
-            _convertHelpers = convertHelpers;
+            return ConvertCurrencyHelpers.ExchangeRate(from, to, ApiKey) * amount;
         }
 
-        // Creates a Dictionary of all Supported Currencies
-        public decimal ConvertCurrency(decimal balance,decimal fromRate, decimal toRate)
+        public async Task<decimal> ConvertAsync(decimal amount, string from, string to)
         {
-            var convertedCurrency = (balance * toRate) / fromRate;
-            return convertedCurrency;
+            return await Task.Run(() => Convert(amount, from, to));
         }
-
-
-        // Returns Exchage Rate
-        public decimal ExchangeRate(decimal balance,Currency fromCurrency, Currency toCurrency)
+        public BalanceInfo ConvertWallet(ConvertCommand command, UserWallet wallet)
         {
-            // Gets up-to-date rates
-            var fromRate = _convertHelpers.ParseData(fromCurrency);
-            var toRate = _convertHelpers.ParseData(toCurrency);
-            if (fromRate == 0 || toRate == 0) return 0;
-            //Calculation 
-            var exchange = ConvertCurrency(balance,fromRate, toRate);
-            return exchange;
+            var balance = Convert(wallet.Balance, command.fromCurrency, command.ToCurrency);
+            wallet.Balance = balance;
+            wallet.Currency = command.ToCurrency;
+            return new BalanceInfo(wallet);
         }
     }
 }

@@ -16,6 +16,6 @@ namespace WebWal.Models
         /// <summary>
         ///     The currency that the amount will be cashed from.
         /// </summary>
-        public Currency Currency { get; set; }
+        public string Currency { get; set; }
     }
 }

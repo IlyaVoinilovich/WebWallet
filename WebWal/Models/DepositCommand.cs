@@ -13,6 +13,6 @@ namespace WebWal.Models
         /// <summary>
         ///     The currency that the amount will be deposited in.
         /// </summary>
-        public Currency Currency { get; set; }
+        public string Currency { get; set; }
     }
 }

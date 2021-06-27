@@ -8,8 +8,7 @@ namespace WebWal.Interface
 {
     public interface IDeposit
     {
-        public BalanceInfo ConvertDeposit(DepositCommand command, UserWallet wallet);
-        public BalanceInfo NewDeposit(DepositCommand command,long UserId);
-        public BalanceInfo Deposit(DepositCommand command, UserWallet wallet); 
+        public Task<BalanceInfo> NewDeposit(DepositCommand command,long UserId);
+        public  BalanceInfo Deposit(DepositCommand command, UserWallet wallet); 
     }
 }

@@ -7,7 +7,7 @@ namespace WebWal.Models
 {
     public class UserWallet
     {
-        public UserWallet(decimal balance, Currency currency, long userId)
+        public UserWallet(decimal balance, string currency, long userId)
         {
             Balance = balance;
             Currency = currency;
@@ -17,7 +17,7 @@ namespace WebWal.Models
         [Key]
         public long Id { get; set; }
         public decimal Balance { get; set; }
-        public Currency Currency { get; set; }
+        public string Currency { get; set; }
         public long UserId { get; set; }
         public void AddBalance(decimal balance)
         {
