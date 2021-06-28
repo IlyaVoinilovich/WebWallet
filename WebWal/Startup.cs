@@ -1,14 +1,14 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using System;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using System.IO;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using WebWal.Helpers;
 using WebWal.Interface;
@@ -28,11 +28,12 @@ namespace WebWal
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHealthChecks().AddDbContextCheck<WalletDbContextcs>();
             services.AddScoped<IWithdraw, WithdrawService>();
             services.AddScoped<IDeposit, DepositService>();
             services.AddScoped<IConvertCurrency, ConvertCurrencyService>();
             services.AddControllers();
-            services.AddDbContext<WalletDbContextcs>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<WalletDbContextcs>(options => options.UseSqlServer(Environment.GetEnvironmentVariable("DefaultConnection")));
             services.AddControllers().AddNewtonsoftJson(options =>options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
             services.AddAuthentication(x =>
             {
@@ -75,6 +76,11 @@ namespace WebWal
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            var configuration = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json") // Duplicate == Json1
+            .AddJsonFile($"appsettings.{env.EnvironmentName}.json") // Duplicate == Json1
+            .AddEnvironmentVariables() // Duplicate == Environment
+            .Build();
             app.UseDeveloperExceptionPage();
             app.UseSwagger();
             app.UseSwaggerUI(c =>
@@ -98,6 +104,7 @@ namespace WebWal
             app.UseCors();
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHealthChecks("/health");
                 endpoints.MapControllers();
             });
         }
