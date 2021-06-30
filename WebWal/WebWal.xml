@@ -97,11 +97,6 @@
             
             </summary>
         </member>
-        <member name="P:WebWal.Interface.ICreateTransactionCommandWebWalletApproved.Transaction">
-            <summary>
-            Approved investments
-            </summary>
-        </member>
         <member name="T:WebWal.Models.BalanceInfo">
             <summary>
             
@@ -131,59 +126,6 @@
             <summary>
                 The currency that the amount will be cashed from.
             </summary>
-        </member>
-        <member name="P:WebWal.StateMachine.WebWalletTransactionStateMachine.WebWalletApproved">
-            <summary>
-            Investment approved by the order management
-            </summary>
-        </member>
-        <member name="P:WebWal.StateMachine.WebWalletTransactionStateMachine.WebWalletRevoked">
-            <summary>
-            Investment revoked by the order management
-            </summary>
-        </member>
-        <member name="P:WebWal.StateMachine.WebWalletTransactionStateMachine.TransactionCreate">
-            <summary>
-            New investment received event
-            </summary>
-        </member>
-        <member name="M:WebWal.StateMachine.WebWalletTransactionStateMachine.#ctor(WebWal.Interface.IWebWallet)">
-            <summary>
-            Order management state machine
-            </summary>
-            <param name="orderManagement"></param>
-        </member>
-        <member name="F:FakeUserApi.Models.RabbitMqConfig.Server">
-            <summary>
-            Server address
-            </summary>
-        </member>
-        <member name="F:FakeUserApi.Models.RabbitMqConfig.User">
-            <summary>
-            Username
-            </summary>
-        </member>
-        <member name="F:FakeUserApi.Models.RabbitMqConfig.Password">
-            <summary>
-            Password
-            </summary>
-        </member>
-        <member name="F:FakeUserApi.Models.RabbitMqConfig.Port">
-            <summary>
-            Server port
-            </summary>
-        </member>
-        <member name="M:FakeUserApi.Models.RabbitMqConfig.GetServiceUri">
-            <summary>
-            Get complete url
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:FakeUserApi.Models.RabbitMqConfig.ToString">
-            <summary>
-            Stringify connection information
-            </summary>
-            <returns></returns>
         </member>
     </members>
 </doc>

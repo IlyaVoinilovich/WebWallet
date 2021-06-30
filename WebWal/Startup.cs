@@ -13,6 +13,13 @@ using System.Text;
 using WebWal.Helpers;
 using WebWal.Interface;
 using WebWal.Services;
+using System.Reflection;
+using System.Collections.Generic;
+using MassTransit.Saga;
+using MassTransit;
+using MassTransit.RabbitMqTransport;
+using WebWal.StateMachine;
+using FakeUserApi.Models;
 
 namespace WebWal
 {
@@ -28,12 +35,14 @@ namespace WebWal
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            string con = "Server =.\\SQLEXPRESS; Database = WebWallet; Trusted_Connection = True; ";
             services.AddHealthChecks().AddDbContextCheck<WalletDbContextcs>();
+            services.AddDbContext<WalletDbContextcs>(options => options.UseSqlServer(con), contextLifetime: ServiceLifetime.Transient, optionsLifetime: ServiceLifetime.Singleton);
             services.AddScoped<IWithdraw, WithdrawService>();
             services.AddScoped<IDeposit, DepositService>();
+            services.AddSingleton<IWebWallet, WebWalletService>();
             services.AddScoped<IConvertCurrency, ConvertCurrencyService>();
             services.AddControllers();
-            services.AddDbContext<WalletDbContextcs>(options => options.UseSqlServer(Environment.GetEnvironmentVariable("DefaultConnection")));
             services.AddControllers().AddNewtonsoftJson(options =>options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
             services.AddAuthentication(x =>
             {
@@ -53,14 +62,38 @@ namespace WebWal
             });
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "UserService", Version = "v1" });
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
-                    Version = "v1",
-                    Title = "WebWallet API",
-                    Description = "A simple example ASP.NET Core Web API",
+                    Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n 
+                      Enter 'Bearer' [space] and then your token in the text input below.
+                      \r\n\r\nExample: 'Bearer 12345abcdef'",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
                 });
-                var filePath = Path.Combine(AppContext.BaseDirectory, "WebWallet.xml");
-                c.IncludeXmlComments(filePath);
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            },
+                            Scheme = "oauth2",
+                            Name = "Bearer",
+                            In = ParameterLocation.Header,
+
+                        },
+                        new List<string>()
+                    }
+                });
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
             });
             services.AddCors(options =>
             {
@@ -71,6 +104,26 @@ namespace WebWal
                     .AllowAnyHeader();
                 });
             });
+            services.AddSingleton<ISagaRepository<WebWalletTransactionState>, InMemorySagaRepository<WebWalletTransactionState>>();
+            services.AddMassTransit(x =>
+            {
+                x.AddSagaStateMachine<WebWalletTransactionStateMachine, WebWalletTransactionState>();
+                x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
+                {
+                    cfg.Host("localhost", h =>
+                    {
+                        h.Username("guest");
+                        h.Password("guest");
+                    });
+
+                    cfg.ReceiveEndpoint( "orderManagement", e =>
+                    {
+                        e.Durable = false;
+                        e.ConfigureSaga<WebWalletTransactionState>(provider);
+                    });
+                }));
+            });
+            services.AddSingleton<IHostedService, BusService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
