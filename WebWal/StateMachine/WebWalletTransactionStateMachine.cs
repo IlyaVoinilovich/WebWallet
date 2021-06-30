@@ -43,7 +43,7 @@ namespace WebWal.StateMachine
                     // Log
                     .IfElse(ctx => orderManagement.TransactionCreate(ctx.Instance.Transaction),
                         ctx => ctx.TransitionTo(WebWalletApproved),
-                        ctx => ctx.TransitionTo(WebWalletRevoked.)));
+                        ctx => ctx.TransitionTo(WebWalletRevoked)));
 
             DuringAny(
                 // Investment approved by order management

@@ -107,7 +107,7 @@ namespace WebWal.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return Ok(_withdraw.Withdraw(command, wallet));
+            return Ok(await _withdraw.Withdraw(command, wallet));
         }
 
         /// <summary>

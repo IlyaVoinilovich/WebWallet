@@ -35,12 +35,10 @@ namespace WebWal
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            string con = "Server =.\\SQLEXPRESS; Database = WebWallet; Trusted_Connection = True; ";
             services.AddHealthChecks().AddDbContextCheck<WalletDbContextcs>();
-            services.AddDbContext<WalletDbContextcs>(options => options.UseSqlServer(con), contextLifetime: ServiceLifetime.Transient, optionsLifetime: ServiceLifetime.Singleton);
+            services.AddDbContext<WalletDbContextcs>(options => options.UseSqlServer(Environment.GetEnvironmentVariable("DefaultConnection")), contextLifetime: ServiceLifetime.Transient, optionsLifetime: ServiceLifetime.Singleton);
             services.AddScoped<IWithdraw, WithdrawService>();
             services.AddScoped<IDeposit, DepositService>();
-            services.AddSingleton<IWebWallet, WebWalletService>();
             services.AddScoped<IConvertCurrency, ConvertCurrencyService>();
             services.AddControllers();
             services.AddControllers().AddNewtonsoftJson(options =>options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
@@ -104,26 +102,6 @@ namespace WebWal
                     .AllowAnyHeader();
                 });
             });
-            services.AddSingleton<ISagaRepository<WebWalletTransactionState>, InMemorySagaRepository<WebWalletTransactionState>>();
-            services.AddMassTransit(x =>
-            {
-                x.AddSagaStateMachine<WebWalletTransactionStateMachine, WebWalletTransactionState>();
-                x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
-                {
-                    cfg.Host("localhost", h =>
-                    {
-                        h.Username("guest");
-                        h.Password("guest");
-                    });
-
-                    cfg.ReceiveEndpoint( "orderManagement", e =>
-                    {
-                        e.Durable = false;
-                        e.ConfigureSaga<WebWalletTransactionState>(provider);
-                    });
-                }));
-            });
-            services.AddSingleton<IHostedService, BusService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

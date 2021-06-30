@@ -102,11 +102,6 @@
             Approved investments
             </summary>
         </member>
-        <member name="T:WebWal.Models.BalanceInfo">
-            <summary>
-            
-            </summary>
-        </member>
         <member name="P:WebWal.Models.ConvertCommand.ToCurrency">
             <summary>
                 The currency that will be converted to another currency.
@@ -130,6 +125,11 @@
         <member name="P:WebWal.Models.WithdrawCommand.Currency">
             <summary>
                 The currency that the amount will be cashed from.
+            </summary>
+        </member>
+        <member name="T:WebWal.Models.BalanceInfo">
+            <summary>
+            
             </summary>
         </member>
         <member name="P:WebWal.StateMachine.WebWalletTransactionStateMachine.WebWalletApproved">
